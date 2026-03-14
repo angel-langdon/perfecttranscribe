@@ -4,6 +4,8 @@ import com.perfecttranscribe.api.GroqRepository
 import com.perfecttranscribe.api.TranscriptionRepository
 import com.perfecttranscribe.audio.AudioRecorder
 import com.perfecttranscribe.audio.Recorder
+import com.perfecttranscribe.share.AndroidSharedAudioCache
+import com.perfecttranscribe.share.SharedAudioCache
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,5 +28,17 @@ abstract class AppBindingsModule {
 
     @Binds
     @Singleton
+    abstract fun bindSharedAudioCache(
+        sharedAudioCache: AndroidSharedAudioCache,
+    ): SharedAudioCache
+
+    @Binds
+    @Singleton
     abstract fun bindApiKeyStore(apiKeyManager: ApiKeyManager): ApiKeyStore
+
+    @Binds
+    @Singleton
+    abstract fun bindTranscribeStateStore(
+        transcribeStateStore: DataStoreTranscribeStateStore,
+    ): TranscribeStateStore
 }

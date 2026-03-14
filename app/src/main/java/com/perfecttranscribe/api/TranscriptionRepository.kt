@@ -7,5 +7,7 @@ interface TranscriptionRepository {
         apiKey: String,
         audioFile: File,
         language: String? = null,
+        model: String = "whisper-large-v3",
+        operationId: String? = null,
     ): Result<String>
 }

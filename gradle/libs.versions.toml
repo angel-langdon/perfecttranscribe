@@ -12,11 +12,15 @@ okhttp = "4.12.0"
 kotlinx-serialization = "1.7.3"
 kotlinx-coroutines = "1.9.0"
 junit4 = "4.13.2"
+androidx-test-core = "1.6.1"
+androidx-test-ext-junit = "1.2.1"
+androidx-test-runner = "1.6.2"
 datastore = "1.1.1"
 security-crypto = "1.1.0-alpha06"
 glance = "1.1.1"
 navigation-compose = "2.8.5"
 core-ktx = "1.15.0"
+media3 = "1.9.2"
 
 [libraries]
 # Compose BOM
@@ -59,6 +63,9 @@ retrofit-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "con
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidx-test-core" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
 
 # DataStore
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
@@ -69,6 +76,7 @@ security-crypto = { group = "androidx.security", name = "security-crypto", versi
 # Glance
 glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
+media3-transformer = { group = "androidx.media3", name = "media3-transformer", version.ref = "media3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

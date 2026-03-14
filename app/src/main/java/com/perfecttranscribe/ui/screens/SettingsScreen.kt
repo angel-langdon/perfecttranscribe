@@ -13,10 +13,14 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -33,13 +37,36 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
+private data class ModelOption(val id: String, val label: String, val description: String)
+
+private val TRANSCRIPTION_MODELS = listOf(
+    ModelOption(
+        id = "whisper-large-v3",
+        label = "Whisper Large V3",
+        description = "Best accuracy, slower",
+    ),
+    ModelOption(
+        id = "whisper-large-v3-turbo",
+        label = "Whisper Large V3 Turbo",
+        description = "Fast, good accuracy",
+    ),
+    ModelOption(
+        id = "distil-whisper-large-v3-en",
+        label = "Distil Whisper Large V3",
+        description = "Fastest, English only",
+    ),
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     currentApiKey: String,
+    currentModel: String,
     hasApiKey: Boolean,
+    showSharedAudioNotice: Boolean,
     onSaveApiKey: (String) -> Unit,
     onClearApiKey: () -> Unit,
+    onSelectModel: (String) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     var apiKeyInput by rememberSaveable { mutableStateOf(currentApiKey) }
@@ -63,6 +90,29 @@ fun SettingsScreen(
                 .padding(padding)
                 .padding(16.dp),
         ) {
+            if (showSharedAudioNotice) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    ),
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Shared audio is waiting",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Save your Groq API key and transcription will start automatically.",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -147,13 +197,90 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
+                        text = "Transcription Model",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Choose which Groq model to use for transcription",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    var expanded by remember { mutableStateOf(false) }
+                    val selectedModel = TRANSCRIPTION_MODELS.find { it.id == currentModel }
+                        ?: TRANSCRIPTION_MODELS.first()
+
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it },
+                    ) {
+                        OutlinedTextField(
+                            value = selectedModel.label,
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                            },
+                            supportingText = {
+                                Text(selectedModel.description)
+                            },
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                        ) {
+                            TRANSCRIPTION_MODELS.forEach { model ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Column {
+                                            Text(
+                                                text = model.label,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                            )
+                                            Text(
+                                                text = model.description,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        onSelectModel(model.id)
+                                        expanded = false
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                ),
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
                         text = "About",
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "PerfectTranscribe uses Groq's Whisper Large V3 Turbo model " +
-                            "for fast, accurate speech-to-text transcription.",
+                        text = "PerfectTranscribe uses Groq for fast, accurate " +
+                            "speech-to-text transcription.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

@@ -16,6 +16,7 @@ import com.perfecttranscribe.MainActivity
 import com.perfecttranscribe.R
 import com.perfecttranscribe.api.TranscriptionRepository
 import com.perfecttranscribe.audio.Recorder
+import com.perfecttranscribe.debug.PipelineLogger
 import com.perfecttranscribe.di.ApiKeyStore
 import com.perfecttranscribe.transcription.normalizeTranscript
 import dagger.hilt.android.AndroidEntryPoint
@@ -98,9 +99,11 @@ class TranscriptionService : Service() {
                 val apiKey = apiKeyStore.getApiKey()
 
                 if (file != null && file.exists() && file.length() > 0 && !apiKey.isNullOrBlank() && copyToClipboard) {
+                    val model = apiKeyStore.getModel()
+                    val operationId = PipelineLogger.newOperationId("service-recording")
                     updateNotification("Transcribing…")
                     scope.launch {
-                        repository.transcribe(apiKey, file)
+                        repository.transcribe(apiKey, file, model = model, operationId = operationId)
                             .onSuccess { text ->
                                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 clipboard.setPrimaryClip(

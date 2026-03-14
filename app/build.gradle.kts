@@ -17,6 +17,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -94,7 +95,12 @@ dependencies {
     // Glance (Widgets)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
+    implementation(libs.media3.transformer)
 
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 }

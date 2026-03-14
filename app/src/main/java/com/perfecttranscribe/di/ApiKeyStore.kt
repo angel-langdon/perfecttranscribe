@@ -8,4 +8,8 @@ interface ApiKeyStore {
     fun hasApiKey(): Boolean
 
     fun clearApiKey()
+
+    fun getModel(): String
+
+    fun saveModel(model: String)
 }
