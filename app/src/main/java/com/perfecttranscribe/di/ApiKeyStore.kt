@@ -12,4 +12,8 @@ interface ApiKeyStore {
     fun getModel(): String
 
     fun saveModel(model: String)
+
+    fun getVocabularyHints(): String
+
+    fun saveVocabularyHints(hints: String)
 }

@@ -100,10 +100,11 @@ class TranscriptionService : Service() {
 
                 if (file != null && file.exists() && file.length() > 0 && !apiKey.isNullOrBlank() && copyToClipboard) {
                     val model = apiKeyStore.getModel()
+                    val prompt = apiKeyStore.getVocabularyHints().takeIf { it.isNotBlank() }
                     val operationId = PipelineLogger.newOperationId("service-recording")
                     updateNotification("Transcribing…")
                     scope.launch {
-                        repository.transcribe(apiKey, file, model = model, operationId = operationId)
+                        repository.transcribe(apiKey, file, model = model, prompt = prompt, operationId = operationId)
                             .onSuccess { text ->
                                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 clipboard.setPrimaryClip(

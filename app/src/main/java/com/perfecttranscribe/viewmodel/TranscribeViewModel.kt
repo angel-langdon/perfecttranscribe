@@ -132,9 +132,10 @@ class TranscribeViewModel @Inject constructor(
         }
 
         val model = apiKeyManager.getModel()
+        val prompt = apiKeyManager.getVocabularyHints().takeIf { it.isNotBlank() }
 
         viewModelScope.launch {
-            groqRepository.transcribe(apiKey, file, model = model, operationId = operationId)
+            groqRepository.transcribe(apiKey, file, model = model, prompt = prompt, operationId = operationId)
                 .onSuccess { text ->
                     val normalizedTranscript = normalizeTranscript(text)
                     transcribeStateStore.saveTranscript(normalizedTranscript)
@@ -299,6 +300,12 @@ class TranscribeViewModel @Inject constructor(
         apiKeyManager.saveModel(model)
     }
 
+    fun getVocabularyHints(): String = apiKeyManager.getVocabularyHints()
+
+    fun saveVocabularyHints(hints: String) {
+        apiKeyManager.saveVocabularyHints(hints)
+    }
+
     fun clearApiKey() {
         apiKeyManager.clearApiKey()
         _uiState.update {
@@ -397,13 +404,14 @@ class TranscribeViewModel @Inject constructor(
         }
 
         val model = apiKeyManager.getModel()
+        val prompt = apiKeyManager.getVocabularyHints().takeIf { it.isNotBlank() }
         val transcribeStartTimeNs = PipelineLogger.now()
         PipelineLogger.log(
             operationId,
             "share.transcribe.start",
             "file=${file.name} size_bytes=${file.length()} model=$model",
         )
-        groqRepository.transcribe(apiKey, file, model = model, operationId = operationId)
+        groqRepository.transcribe(apiKey, file, model = model, prompt = prompt, operationId = operationId)
             .onSuccess { text ->
                 val normalizedTranscript = normalizeTranscript(text)
                 transcribeStateStore.saveTranscript(normalizedTranscript)

@@ -67,11 +67,13 @@ fun AppNavigation(
             SettingsScreen(
                 currentApiKey = viewModel.getApiKey(),
                 currentModel = viewModel.getModel(),
+                currentVocabularyHints = viewModel.getVocabularyHints(),
                 hasApiKey = uiState.hasApiKey,
                 showSharedAudioNotice = uiState.hasPendingSharedAudio,
                 onSaveApiKey = viewModel::saveApiKey,
                 onClearApiKey = viewModel::clearApiKey,
                 onSelectModel = viewModel::saveModel,
+                onSaveVocabularyHints = viewModel::saveVocabularyHints,
                 onNavigateBack = { navController.popBackStack() },
             )
         }

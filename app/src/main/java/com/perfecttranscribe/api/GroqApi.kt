@@ -19,6 +19,7 @@ interface GroqApi {
         @Part("model") model: RequestBody,
         @Part("response_format") responseFormat: RequestBody,
         @Part("language") language: RequestBody? = null,
+        @Part("prompt") prompt: RequestBody? = null,
     ): TranscriptionResponse
 }
 

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
@@ -62,11 +64,13 @@ private val TRANSCRIPTION_MODELS = listOf(
 fun SettingsScreen(
     currentApiKey: String,
     currentModel: String,
+    currentVocabularyHints: String,
     hasApiKey: Boolean,
     showSharedAudioNotice: Boolean,
     onSaveApiKey: (String) -> Unit,
     onClearApiKey: () -> Unit,
     onSelectModel: (String) -> Unit,
+    onSaveVocabularyHints: (String) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     var apiKeyInput by rememberSaveable { mutableStateOf(currentApiKey) }
@@ -88,6 +92,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
             if (showSharedAudioNotice) {
@@ -266,6 +271,13 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            VocabularyHintsCard(
+                currentHints = currentVocabularyHints,
+                onSave = onSaveVocabularyHints,
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -285,6 +297,58 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun VocabularyHintsCard(
+    currentHints: String,
+    onSave: (String) -> Unit,
+) {
+    var hintsInput by rememberSaveable { mutableStateOf(currentHints) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Vocabulary Hints",
+                style = MaterialTheme.typography.titleMedium,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Add words or names the model might struggle with, " +
+                    "separated by commas (e.g. Okinawa, Claude Code, Kotlin)",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = hintsInput,
+                onValueChange = { hintsInput = it },
+                label = { Text("Words and names") },
+                placeholder = { Text("Okinawa, Claude Code, Whisper") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+                maxLines = 4,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { onSave(hintsInput.trim()) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Save Hints")
             }
         }
     }

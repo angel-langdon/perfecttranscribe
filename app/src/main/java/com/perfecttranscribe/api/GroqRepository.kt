@@ -40,6 +40,7 @@ class GroqRepository @Inject constructor(
         audioFile: File,
         language: String?,
         model: String,
+        prompt: String?,
         operationId: String?,
     ): Result<String> = try {
         val logId = operationId ?: PipelineLogger.newOperationId("transcribe")
@@ -64,6 +65,8 @@ class GroqRepository @Inject constructor(
         val formatPart = "json"
             .toRequestBody("text/plain".toMediaType())
         val langPart = language?.toRequestBody("text/plain".toMediaType())
+        val promptPart = prompt?.takeIf { it.isNotBlank() }
+            ?.toRequestBody("text/plain".toMediaType())
 
         val response = api.transcribe(
             authorization = "Bearer $apiKey",
@@ -71,6 +74,7 @@ class GroqRepository @Inject constructor(
             model = modelPart,
             responseFormat = formatPart,
             language = langPart,
+            prompt = promptPart,
         )
         PipelineLogger.logDuration(
             logId,

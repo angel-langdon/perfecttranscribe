@@ -184,7 +184,7 @@ fun TranscribeScreen(
                             CircularProgressIndicator()
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "Transcribing…",
+                                text = uiState.activityMessage ?: "Transcribing…",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
