@@ -1,10 +1,12 @@
 package com.perfecttranscribe.widget
 
 import android.content.Context
-import android.content.Intent
+import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -12,6 +14,7 @@ import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.provideContent
@@ -31,6 +34,7 @@ import androidx.glance.text.TextStyle
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.glance.appwidget.updateAll
+import com.perfecttranscribe.navigation.PreviousAppNavigator
 import com.perfecttranscribe.service.TranscriptionService
 
 class TranscribeWidget : GlanceAppWidget() {
@@ -81,6 +85,18 @@ class TranscribeWidget : GlanceAppWidget() {
     companion object {
         val IsRecordingKey = booleanPreferencesKey("is_recording")
         val RecordingParam = ActionParameters.Key<Boolean>("recording")
+
+        suspend fun setRecordingState(context: Context, isRecording: Boolean) {
+            val manager = GlanceAppWidgetManager(context)
+            manager.getGlanceIds(TranscribeWidget::class.java).forEach { glanceId ->
+                updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
+                    prefs.toMutablePreferences().apply {
+                        this[IsRecordingKey] = isRecording
+                    }
+                }
+            }
+            TranscribeWidget().updateAll(context)
+        }
     }
 }
 
@@ -93,27 +109,30 @@ class ToggleRecordingAction : ActionCallback {
         val shouldRecord = parameters[TranscribeWidget.RecordingParam] ?: false
 
         if (shouldRecord) {
-            TranscriptionService.startService(context)
+            val hasRecordPermission = ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.RECORD_AUDIO,
+            ) == PackageManager.PERMISSION_GRANTED
 
-            // Launch main activity for actual recording
-            val launchIntent = context.packageManager
-                .getLaunchIntentForPackage(context.packageName)
-                ?.apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    putExtra("start_recording", true)
-                }
-            if (launchIntent != null) {
-                context.startActivity(launchIntent)
+            if (!hasRecordPermission) {
+                Toast.makeText(
+                    context,
+                    "Grant microphone permission in the app first",
+                    Toast.LENGTH_SHORT,
+                ).show()
+                TranscribeWidget.setRecordingState(context, false)
+                return
             }
+
+            TranscriptionService.startService(
+                context = context,
+                copyToClipboard = true,
+                returnToPackage = PreviousAppNavigator.captureReturnPackage(context),
+            )
         } else {
             TranscriptionService.stopService(context)
         }
 
-        updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
-            prefs.toMutablePreferences().apply {
-                this[TranscribeWidget.IsRecordingKey] = shouldRecord
-            }
-        }
-        TranscribeWidget().updateAll(context)
+        TranscribeWidget.setRecordingState(context, shouldRecord)
     }
 }
