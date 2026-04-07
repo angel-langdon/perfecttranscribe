@@ -236,6 +236,7 @@ private class FakeTranscriptionRepository(
         audioFile: File,
         language: String?,
         model: String,
+        prompt: String?,
         operationId: String?,
     ): Result<String> {
         callCount += 1
@@ -246,6 +247,7 @@ private class FakeTranscriptionRepository(
 private class FakeApiKeyStore(
     private var apiKey: String?,
     private var model: String = "whisper-large-v3",
+    private var vocabularyHints: String = "",
 ) : ApiKeyStore {
     override fun getApiKey(): String? = apiKey
 
@@ -263,6 +265,12 @@ private class FakeApiKeyStore(
 
     override fun saveModel(model: String) {
         this.model = model
+    }
+
+    override fun getVocabularyHints(): String = vocabularyHints
+
+    override fun saveVocabularyHints(hints: String) {
+        vocabularyHints = hints
     }
 }
 

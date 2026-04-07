@@ -1,3 +1,20 @@
+import java.util.Properties
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use(keystoreProperties::load)
+}
+
+fun signingValue(name: String): String? =
+    (keystoreProperties.getProperty(name) ?: System.getenv(name))?.takeIf { it.isNotBlank() }
+
+val releaseStoreFile = signingValue("RELEASE_STORE_FILE")
+val releaseStorePassword = signingValue("RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = signingValue("RELEASE_KEY_ALIAS")
+val releaseKeyPassword = signingValue("RELEASE_KEY_PASSWORD")
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,17 +28,34 @@ android {
     namespace = "com.perfecttranscribe"
     compileSdk = 35
 
+    signingConfigs {
+        if (
+            releaseStoreFile != null &&
+            releaseStorePassword != null &&
+            releaseKeyAlias != null &&
+            releaseKeyPassword != null
+        ) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.perfecttranscribe"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

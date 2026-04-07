@@ -91,7 +91,13 @@ Install the debug build with:
 ./gradlew installDebug
 ```
 
-The repo also includes [`redeploy.sh`](/home/angel/projects/perfecttranscribe/redeploy.sh), a local helper script that builds, installs, and launches the debug APK on a configured device.
+The repo also includes [`redeploy.sh`](./redeploy.sh), a local helper script that builds, installs, and launches the debug APK on a connected device. If multiple devices are attached, pass a serial or choose one interactively.
+
+Release builds are optimized, but they are only installable when signed with a release keystore. To enable that locally, copy `keystore.properties.example` to `keystore.properties`, fill in your signing values, and run:
+
+```bash
+./gradlew assembleRelease
+```
 
 ## Testing
 
